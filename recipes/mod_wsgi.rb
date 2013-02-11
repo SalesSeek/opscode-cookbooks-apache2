@@ -20,7 +20,21 @@
 case node['platform_family']
 when "debian"
 
-  package "libapache2-mod-wsgi"
+  # default Debian mod_wsgi package
+  debian_package = 'libapache2-mod-wsgi'
+
+  if node.attribute?('python') and node['python'].has_key? 'version'
+    if not node['python'].has_key? 'major_version'
+      node.set['python']['major_version'] = \
+        node['python']['version'].split('i').first.to_i
+    end
+    if node['python']['major_version'] > 2:
+      # mod_wsgi package for Python 3.x
+      debian_package = 'libapache2-mod-wsgi-py3'
+    end
+  end
+
+  package debian_package
 
 when "rhel", "fedora", "arch"
 
